@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">    
+    <title>Wall One</title>
+</head>
+
+<body>
+    <div class="d-flex justify-content-between m-4">
+        <h3>Coding Dojo Wall</h3>
+        <h3>Welcome, {{user.first_name}} <a href="/logout" class="text-center mx-auto">Logout</a></h3>
+    </div>
+
+    <div class="container">
+        <div class="d-flex p-4 mt-4 justify-content-around">
+            <div class="col-6 p-3 m-2">
+                <h3>{{nb_msg_rc.nb_msg_rc}} Message(s) for You</h3>
+                {% for one_message in all_the_messages %}
+                    {%if (one_message.time_spent.days >= 1) and (one_message.time_spent.days < 31) %}
+                    {% set timespent=one_message.time_spent.days  %}
+                      {%if timespent == 1%}
+                      {% set said="day" %}
+                      {% else %}
+                      {% set said = "days" %}
+                      {% endif %}  
+                    
+                    {%elif (one_message.time_spent.days >= 31) and (one_message.time_spent.days < 360) %}
+                    {% set timespent=(one_message.time_spent.days // 31) %}
+                        {% if timespent > 1 %}
+                        {% set said="months" %}
+                        {% else %}
+                        {% set said = "month" %}
+                        {% endif %}
+                    
+                    {%elif (one_message.time_spent.days == 0) and ((one_message.time_spent.seconds // 3600) >= 1) %}
+                    {% set timespent=(one_message.time_spent.seconds // 3600) %}
+                       {% if timespent > 1 %}
+                       {% set said="hours" %}
+                       {% else %}
+                       {% set said = "hour" %}
+                       {% endif %}
+                    
+                    {%elif (one_message.time_spent.seconds < 3600) and ((one_message.time_spent.seconds // 60) >= 1) %}
+                    {% set timespent=(one_message.time_spent.seconds // 60) %}
+                       {% if timespent > 1 %}
+                       {% set said="minutes" %}
+                       {% else %}
+                       {% set said = "minute" %}
+                       {% endif %}
+                   
+                    {%elif one_message.time_spent.seconds < 60 %}
+                    {% set timespent=one_message.time_spent.seconds  %}
+                       {% if timespent > 1 %}
+                       {% set said="seconds" %}
+                       {% else %}
+                       {% set said = "now" %}
+                       {% endif %}
+                    
+                    {% endif %}
+                    <div class="w-50 d-inline-block">{{ one_message.sender }} said <span class="text-warning">( {{timespent}} {{said}} ago )</span></div>
+                    <span class="ml-5"><a href="/message/delete/{{one_message.id}}"><i class="bi bi-trash text-danger display-7" ></i></a></span>
+                    <p>{{ one_message.content }}</p>
+
+                {% endfor %}
+            </div>
+            <div class="p-3 col-6 m-2">
+                <h3>Send Messages</h3>
+                <h5 class="text-success">You have sent {{nb_msg_se.nb_msg_se}} messages so far</h5>
+                {% with messages = get_flashed_messages(category_filter=['messages']) %}
+                <!-- declare a variable called messages -->
+                {%for message in messages%}
+                {% if message %} <!-- check if there is a message -->
+                <div class="bg-danger">
+                    <h4>{{message}}</h4> <!-- display message in a paragraph tag -->
+                </div>
+                {% endif %}
+                {%endfor%}
+                {% endwith %}
+                {%for user in users%}
+                <form action="/message/create" method="POST">
+                    <input type="hidden" name="sender_id" value={{user.id}}>
+                    <input type="hidden" name="receiver_id" value={{session.user_id}}>
+                    <div class="form-group row">
+
+                        <label for="content" class="col-sm-2 col-form-label">{{user.first_name}}</label>
+                        <div class="col-sm-8">
+                            <textarea rows="2" cols="20" name="content" class="form-control">
+                            </textarea>
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="submit" value="send" class="btn btn-success">
+                        </div>
+                    </div>
+                </form>
+                <br>
+                {%endfor%}
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+</body>
+
+</html>
